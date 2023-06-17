@@ -25,7 +25,7 @@ public class Program
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // Add CodaContext as an available service.
+            // Add MyDbContext as an available service.
             builder.Services.AddScoped<MyDbContext>();
 
             var dbContext = new MyDbContext();
@@ -97,7 +97,7 @@ public class Program
             await app.RunAsync();
         }
 
-        private static ObjectType CreateQueryType(MyDbContext _codaContext)
+        private static ObjectType CreateQueryType(MyDbContext dbContext)
         {
             if (CreatedQueryType is not null) return CreatedQueryType;
 
@@ -105,7 +105,7 @@ public class Program
             {
                 rqt.Name(OperationTypeNames.Query).Description("The root query type.");
 
-                foreach (var entityType in _codaContext.Model.GetEntityTypes())
+                foreach (var entityType in dbContext.Model.GetEntityTypes())
                 {
                     /*entityType.DumpToConsole();*/
                     Console.WriteLine($"Name: {entityType.Name}");
@@ -142,7 +142,7 @@ public class Program
                         .Resolve(fr =>
                         {
                             var idArg = fr.ArgumentValue<int>("id");
-                            var entry = _codaContext.Entry(_codaContext.Find(entityType.ClrType, idArg));
+                            var entry = dbContext.Entry(dbContext.Find(entityType.ClrType, idArg));
 
                             return entry.Entity;
                         });
@@ -154,10 +154,10 @@ public class Program
                         .Resolve(fr =>
                         {
                             // ! Super ugly EF hack because Microsoft doesn't expose a non-generic Set method.
-                            var method = _codaContext.GetType().GetMethod("Set", new Type[0])
+                            var method = dbContext.GetType().GetMethod("Set", new Type[0])
                                 .MakeGenericMethod(entityType.ClrType);
 
-                            var dbSet = method.Invoke(_codaContext, new object[0]);
+                            var dbSet = method.Invoke(dbContext, new object[0]);
 
                             MethodInfo castMethod =
                                 typeof(Program).GetMethod("Cast").MakeGenericMethod(entityType.ClrType);

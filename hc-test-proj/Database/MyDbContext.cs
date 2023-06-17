@@ -11,7 +11,7 @@ public class MyDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseNpgsql("Server=127.0.0.1;Port=5432;Database=coda_dev;User Id=postgres;Password=12345;")
+            .UseNpgsql("Server=127.0.0.1;Port=5432;Database=hc_test_db;User Id=postgres;Password=12345;")
             .UseLazyLoadingProxies(useLazyLoadingProxies: true)
             ;
     }
